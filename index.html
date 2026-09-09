@@ -5,18 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gestor de Rifas</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
   :root{
-    --bg: #16332B;
-    --panel: #1E4438;
-    --panel-2: #234E40;
-    --paper: #F4ECD8;
-    --ink: #1C2A22;
-    --gold: #C79A3D;
-    --red: #B23A32;
-    --green: #3F7A52;
-    --muted-border: #7E9A8C;
+    --ink-900: #1A2027;
+    --ink-700: #3E4650;
+    --ink-500: #6B7280;
+    --ink-300: #A7ADB5;
+    --ink-150: #DDE1E5;
+    --ink-100: #EDEFF1;
+    --bg: #F7F8F9;
+    --surface: #FFFFFF;
   }
 
   *{ box-sizing: border-box; }
@@ -24,155 +23,156 @@
   body{
     margin:0;
     background: var(--bg);
-    background-image:
-      radial-gradient(circle at 15% 10%, rgba(199,154,61,0.08), transparent 40%),
-      radial-gradient(circle at 90% 80%, rgba(199,154,61,0.06), transparent 45%);
-    color: var(--paper);
-    font-family: 'IBM Plex Sans', sans-serif;
-    padding: 24px 18px 60px;
+    color: var(--ink-900);
+    font-family: 'Inter', sans-serif;
+    padding: 28px 18px 60px;
     min-height: 100vh;
   }
 
-  .wrap{ max-width: 980px; margin: 0 auto; }
+  .wrap{ max-width: 900px; margin: 0 auto; }
 
-  header.top{ margin-bottom: 18px; }
+  header.top{ margin-bottom: 20px; }
   header.top h1{
-    font-family: 'Fraunces', serif;
-    font-weight: 600;
-    font-size: clamp(26px, 5vw, 38px);
-    margin: 0 0 6px;
+    font-weight: 700;
+    font-size: clamp(24px, 4.5vw, 32px);
+    margin: 0 0 4px;
     letter-spacing: -0.01em;
+    color: var(--ink-900);
   }
   header.top p{
     margin: 0;
-    color: #B9CFC2;
-    font-size: 14px;
+    color: var(--ink-500);
+    font-size: 13.5px;
     max-width: 60ch;
   }
 
+  .status-line{
+    display:flex; align-items:center; gap: 8px;
+    font-size: 12px; color: var(--ink-500); margin-bottom: 16px;
+  }
+  .status-dot{ width:6px; height:6px; border-radius:50%; background: var(--ink-300); }
+
   nav.tabs{
     display:flex;
-    gap: 6px;
-    margin-bottom: 18px;
-    border-bottom: 1px solid rgba(199,154,61,0.25);
+    gap: 2px;
+    margin-bottom: 20px;
+    background: var(--ink-100);
+    border-radius: 10px;
+    padding: 3px;
+    width: fit-content;
   }
   nav.tabs button{
     background: transparent;
     border: none;
-    color: #B9CFC2;
-    font-family: 'IBM Plex Sans', sans-serif;
+    color: var(--ink-500);
+    font-family: 'Inter', sans-serif;
     font-weight: 600;
-    font-size: 14px;
-    padding: 10px 6px;
+    font-size: 13.5px;
+    padding: 8px 16px;
     cursor: pointer;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
+    border-radius: 8px;
   }
   nav.tabs button.active{
-    color: var(--gold);
-    border-bottom-color: var(--gold);
+    color: var(--ink-900);
+    background: var(--surface);
+    box-shadow: 0 1px 2px rgba(26,32,39,0.08);
   }
 
   .view{ display:none; }
   .view.active{ display:block; }
 
   .panel{
-    background: var(--panel);
-    border: 1px solid rgba(199,154,61,0.25);
-    border-radius: 14px;
+    background: var(--surface);
+    border: 1px solid var(--ink-150);
+    border-radius: 12px;
     padding: 18px 20px;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
   }
 
   .panel h2{
-    font-family: 'Fraunces', serif;
-    font-weight: 600;
-    font-size: 17px;
+    font-weight: 700;
+    font-size: 15px;
     margin: 0 0 14px;
-    color: var(--gold);
+    color: var(--ink-900);
   }
 
-  .config-row{ display: flex; gap: 16px; flex-wrap: wrap; }
-  .field{ display: flex; flex-direction: column; gap: 5px; min-width: 110px; }
-  .field label{ font-size: 12.5px; color: #B9CFC2; }
+  .config-row{ display: flex; gap: 14px; flex-wrap: wrap; }
+  .field{ display: flex; flex-direction: column; gap: 5px; min-width: 100px; }
+  .field label{ font-size: 12px; color: var(--ink-500); font-weight: 500; }
   .field input, .field select{
-    background: var(--panel-2);
-    border: 1px solid rgba(199,154,61,0.3);
-    color: var(--paper);
+    background: var(--surface);
+    border: 1px solid var(--ink-150);
+    color: var(--ink-900);
     border-radius: 8px;
     padding: 8px 10px;
-    font-size: 14.5px;
+    font-size: 14px;
     font-family: inherit;
   }
-  .field input:focus, .field select:focus{ outline: 2px solid var(--gold); outline-offset: 1px; }
+  .field input:focus, .field select:focus{ outline: 2px solid var(--ink-700); outline-offset: 1px; }
   .field.grow{ flex: 1; }
 
-  .helptext{ font-size: 12.5px; color: #B9CFC2; margin: 4px 0 0; }
+  .helptext{ font-size: 12.5px; color: var(--ink-500); margin: 8px 0 0; }
   .warning{
     font-size: 13px;
-    color: #E8C77E;
-    background: rgba(199,154,61,0.12);
-    border: 1px solid rgba(199,154,61,0.3);
+    color: var(--ink-700);
+    background: var(--ink-100);
+    border: 1px solid var(--ink-150);
     border-radius: 8px;
     padding: 10px 12px;
     margin-top: 14px;
   }
 
-  .stats{ display:flex; gap: 18px; flex-wrap: wrap; margin-top: 4px; }
+  .stats{ display:flex; gap: 24px; flex-wrap: wrap; margin-top: 2px; }
   .stat{ display:flex; flex-direction: column; gap: 2px; }
-  .stat .n{ font-family:'Fraunces', serif; font-weight:700; font-size: 22px; }
-  .stat .l{ font-size: 12px; color: #B9CFC2; }
-  .stat.paid .n{ color: var(--green); }
-  .stat.pending .n{ color: var(--red); }
-  .stat.free .n{ color: var(--gold); }
+  .stat .n{ font-weight:700; font-size: 20px; color: var(--ink-900); }
+  .stat .l{ font-size: 11.5px; color: var(--ink-500); }
 
   .actions{ display:flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
   button{
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 13.5px;
     border-radius: 8px;
     padding: 10px 16px;
-    border: none;
+    border: 1px solid transparent;
     cursor: pointer;
   }
-  .btn-primary{ background: var(--gold); color: #1C2A22; }
-  .btn-primary:hover{ background: #d6ab4c; }
-  .btn-secondary{ background: transparent; border: 1px solid rgba(244,236,216,0.35); color: var(--paper); }
-  .btn-secondary:hover{ border-color: var(--paper); }
-  .btn-danger{ background: transparent; border: 1px solid var(--red); color: #E8A39E; }
-  .btn-danger:hover{ background: rgba(178,58,50,0.15); }
+  .btn-primary{ background: var(--ink-900); color: var(--surface); }
+  .btn-primary:hover{ background: var(--ink-700); }
+  .btn-secondary{ background: var(--surface); border-color: var(--ink-150); color: var(--ink-900); }
+  .btn-secondary:hover{ border-color: var(--ink-300); }
+  .btn-danger{ background: var(--surface); border-color: var(--ink-150); color: var(--ink-500); }
+  .btn-danger:hover{ border-color: var(--ink-500); color: var(--ink-900); }
 
   #editor{ display:none; position: sticky; top: 12px; z-index: 10; }
   #editor.open{ display:block; }
-  #editor .panel{ border-color: var(--gold); box-shadow: 0 8px 30px rgba(0,0,0,0.35); }
-  .editor-row{ display:flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; }
+  #editor .panel{ border-color: var(--ink-900); box-shadow: 0 8px 24px rgba(26,32,39,0.1); }
+  .editor-row{ display:flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
   .editor-badge{
-    font-family:'Fraunces', serif;
     font-weight:700;
-    font-size: 26px;
-    background: var(--paper);
-    color: var(--ink);
-    border-radius: 10px;
-    padding: 8px 16px;
-    min-width: 56px;
+    font-size: 22px;
+    background: var(--ink-900);
+    color: var(--surface);
+    border-radius: 8px;
+    padding: 8px 14px;
+    min-width: 48px;
     text-align:center;
   }
-  .paid-toggle{ display:flex; align-items:center; gap: 8px; padding: 9px 4px; }
-  .paid-toggle input{ width: 17px; height: 17px; accent-color: var(--green); }
+  .paid-toggle{ display:flex; align-items:center; gap: 8px; padding: 9px 4px; font-size: 13.5px; color: var(--ink-700); }
+  .paid-toggle input{ width: 16px; height: 16px; accent-color: var(--ink-900); }
 
-  .grid-hint{ font-size: 12.5px; color: #B9CFC2; margin: 0 0 14px; }
+  .grid-hint{ font-size: 12px; color: var(--ink-500); margin: 0 0 14px; }
 
-  #grid{ display: grid; gap: 8px; }
+  #grid{ display: grid; gap: 6px; grid-template-columns: repeat(10, 1fr); }
 
   .cell{
     position: relative;
-    background: var(--paper);
-    border-radius: 8px;
-    border: 1.5px dashed var(--muted-border);
-    color: var(--ink);
-    padding: 8px 6px;
-    min-height: 58px;
+    background: var(--surface);
+    border-radius: 6px;
+    border: 1px dashed var(--ink-150);
+    color: var(--ink-300);
+    padding: 6px 4px;
+    min-height: 50px;
     cursor: pointer;
     display:flex;
     flex-direction: column;
@@ -180,40 +180,49 @@
     justify-content:center;
     text-align:center;
     overflow: hidden;
-    transition: transform 0.08s ease;
+    transition: transform 0.08s ease, border-color 0.12s ease;
   }
-  .cell:hover{ transform: translateY(-2px); }
-  .cell .num{ font-family:'Fraunces', serif; font-weight: 700; font-size: 17px; opacity: 0.55; line-height: 1; }
-  .cell .name{ font-size: 10.5px; font-weight: 600; margin-top: 3px; line-height: 1.15; word-break: break-word; }
+  .cell:hover{ transform: translateY(-1px); border-color: var(--ink-500); }
+  .cell .num{ font-weight: 700; font-size: 15px; line-height: 1; color: inherit; }
+  .cell .name{ font-size: 9px; font-weight: 500; margin-top: 3px; line-height: 1.15; word-break: break-word; color: inherit; }
 
-  .cell.pending{ border: 1.5px solid var(--red); }
-  .cell.pending .num{ opacity: 1; }
-  .cell.pending::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:5px; background: var(--red); }
+  .cell.pending{
+    border: 1px solid var(--ink-500);
+    color: var(--ink-900);
+  }
 
-  .cell.paid{ border: 1.5px solid var(--green); }
-  .cell.paid .num{ opacity: 1; }
+  .cell.paid{
+    border: 1px solid var(--ink-900);
+    background: var(--ink-900);
+    color: var(--surface);
+  }
+  .cell.paid .name{ color: #D9DCE0; }
   .cell.paid::after{
-    content: "PAGADO";
-    position: absolute; top: 4px; right: -18px;
-    background: var(--green); color: var(--paper);
-    font-size: 7.5px; font-weight: 700; letter-spacing: 0.04em;
-    padding: 2px 20px; transform: rotate(28deg);
+    content: "✓";
+    position: absolute;
+    top: 3px;
+    right: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--surface);
   }
 
-  .cell.selected{ outline: 2px solid var(--gold); outline-offset: 2px; }
+  .cell.selected{ outline: 2px solid var(--ink-900); outline-offset: 2px; }
 
-  .status-line{
-    display:flex; align-items:center; gap: 10px;
-    font-size: 12.5px; color: #B9CFC2; margin-bottom: 14px;
-  }
-  .status-dot{ width:7px; height:7px; border-radius:50%; background: var(--gold); }
+  .legend{ display:flex; gap: 18px; flex-wrap: wrap; margin: 0 0 14px; }
+  .legend-item{ display:flex; align-items:center; gap: 7px; font-size: 12px; color: var(--ink-500); }
+  .legend-swatch{ width: 15px; height: 15px; border-radius: 4px; flex-shrink: 0; }
+  .legend-swatch.available{ border: 1px dashed var(--ink-150); background: var(--surface); }
+  .legend-swatch.pending{ border: 1px solid var(--ink-500); background: var(--surface); }
+  .legend-swatch.paid{ border: 1px solid var(--ink-900); background: var(--ink-900); }
 
-  footer.credit{ text-align:center; color: #7E9A8C; font-size: 12px; margin-top: 30px; }
+  footer.credit{ text-align:center; color: var(--ink-300); font-size: 11.5px; margin-top: 30px; }
 
   @media (max-width: 480px){
-    .cell{ min-height: 50px; }
-    .cell .num{ font-size: 15px; }
-    .cell .name{ font-size: 9.5px; }
+    #grid{ grid-template-columns: repeat(8, 1fr); }
+    .cell{ min-height: 44px; }
+    .cell .num{ font-size: 13px; }
+    .cell .name{ font-size: 8.5px; }
   }
 </style>
 </head>
@@ -222,14 +231,14 @@
 
   <header class="top">
     <h1>Gestor de rifas</h1>
-    <p>Configura la rifa, asigna números y descarga la imagen final para compartirla.</p>
+    <p>Toca un número para asignarlo y marcar el pago. Descarga la imagen cuando esté lista.</p>
   </header>
 
   <div class="status-line" id="statusLine"><span class="status-dot"></span><span id="statusText">Cargando datos guardados…</span></div>
 
   <nav class="tabs">
-    <button id="tabConfig" data-view="config">Configuración</button>
     <button id="tabGrid" data-view="grid">Cuadrícula</button>
+    <button id="tabConfig" data-view="config">Configuración</button>
   </nav>
 
   <!-- CONFIG VIEW -->
@@ -288,7 +297,7 @@
         <h2 id="editorTitle">Número</h2>
         <div class="editor-row">
           <div class="editor-badge" id="editorBadge">00</div>
-          <div class="field" style="flex:1; min-width:180px;">
+          <div class="field" style="flex:1; min-width:160px;">
             <label for="nameInput">Nombre</label>
             <input type="text" id="nameInput" placeholder="Nombre del comprador">
           </div>
@@ -297,14 +306,18 @@
             Pagado
           </label>
           <button class="btn-primary" id="saveBtn">Guardar</button>
-          <button class="btn-danger" id="clearBtn">Vaciar número</button>
+          <button class="btn-danger" id="clearBtn">Vaciar</button>
           <button class="btn-secondary" id="closeEditorBtn">Cerrar</button>
         </div>
       </div>
     </div>
 
     <div class="panel">
-      <p class="grid-hint">Gris punteado = disponible · borde rojo = asignado, falta pagar · sello verde = pagado</p>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-swatch available"></span>Disponible</div>
+        <div class="legend-item"><span class="legend-swatch pending"></span>Pendiente de pago</div>
+        <div class="legend-item"><span class="legend-swatch paid"></span>Pagado</div>
+      </div>
       <div id="grid"></div>
     </div>
   </div>
@@ -317,7 +330,7 @@
 
   let state = {
     total: 100,
-    start: 1,
+    start: 0,
     cols: 10,
     title: "Rifa",
     entries: {}
@@ -361,11 +374,11 @@
         hasSavedState = true;
         setStatus('Datos cargados de este dispositivo');
       } else {
-        setStatus('Rifa nueva — configúrala para empezar');
+        setStatus('Rifa nueva — lista para usar');
       }
     }catch(err){
       hasSavedState = false;
-      setStatus('Rifa nueva — configúrala para empezar');
+      setStatus('Rifa nueva — lista para usar');
     }
   }
 
@@ -384,14 +397,16 @@
   // ---------- Helpers ----------
   function padLength(){
     const max = state.start + state.total - 1;
-    return String(max).length;
+    return Math.max(2, String(max).length);
   }
   function formatNumber(n){ return String(n).padStart(padLength(), '0'); }
 
   function updateRangeHelp(){
     const startVal = parseInt(startInput.value) || 0;
     const totalVal = Math.max(2, parseInt(totalInput.value) || 100);
-    rangeHelp.textContent = `Los números irán del ${String(startVal).padStart(String(startVal+totalVal-1).length,'0')} al ${String(startVal+totalVal-1).padStart(String(startVal+totalVal-1).length,'0')}.`;
+    const maxVal = startVal + totalVal - 1;
+    const len = Math.max(2, String(maxVal).length);
+    rangeHelp.textContent = `Los números irán del ${String(startVal).padStart(len,'0')} al ${String(maxVal).padStart(len,'0')}.`;
   }
   totalInput.addEventListener('input', updateRangeHelp);
   startInput.addEventListener('input', updateRangeHelp);
@@ -438,9 +453,9 @@
     const free = total - paid - pending;
     document.getElementById('stats').innerHTML = `
       <div class="stat"><div class="n">${total}</div><div class="l">Total</div></div>
-      <div class="stat paid"><div class="n">${paid}</div><div class="l">Pagados</div></div>
-      <div class="stat pending"><div class="n">${pending}</div><div class="l">Pendientes</div></div>
-      <div class="stat free"><div class="n">${free}</div><div class="l">Disponibles</div></div>
+      <div class="stat"><div class="n">${paid}</div><div class="l">Pagados</div></div>
+      <div class="stat"><div class="n">${pending}</div><div class="l">Pendientes</div></div>
+      <div class="stat"><div class="n">${free}</div><div class="l">Disponibles</div></div>
     `;
   }
 
@@ -500,7 +515,7 @@
     Object.keys(state.entries).forEach(k => {
       const n = parseInt(k);
       if(n < start || n >= start + total){
-        if(state.entries[k].name) removed.push(formatNumberFor(n, start, total));
+        if(state.entries[k].name) removed.push(k);
         delete state.entries[k];
       }
     });
@@ -521,16 +536,12 @@
     saveState();
     showView('grid');
   }
-  function formatNumberFor(n, start, total){
-    const max = start + total - 1;
-    return String(n).padStart(String(max).length, '0');
-  }
 
   document.getElementById('applyConfigBtn').addEventListener('click', applyConfig);
 
   document.getElementById('resetBtn').addEventListener('click', async () => {
     if(confirm('¿Borrar todos los datos guardados de esta rifa? Esta acción no se puede deshacer.')){
-      state = { total: 100, start: 1, cols: 10, title: 'Rifa', entries: {} };
+      state = { total: 100, start: 0, cols: 10, title: 'Rifa', entries: {} };
       try{ await window.storage.delete(STORAGE_KEY, false); }catch(e){}
       fillConfigForm();
       renderGrid();
@@ -557,11 +568,9 @@
     const ctx = canvas.getContext('2d');
     ctx.scale(scale, scale);
 
-    // Fondo blanco
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, width, height);
 
-    // Título
     ctx.fillStyle = '#000000';
     ctx.font = '700 22px Arial, sans-serif';
     ctx.textBaseline = 'top';
@@ -597,34 +606,28 @@
     const hasName = entry && entry.name;
 
     ctx.save();
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 1;
-    if(!hasName){
-      ctx.setLineDash([2,2]);
+    if(paid){
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(x, y, w, h);
     } else {
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 1;
+      if(!hasName) ctx.setLineDash([2,2]);
+      else ctx.setLineDash([]);
+      ctx.strokeRect(x, y, w, h);
       ctx.setLineDash([]);
     }
-    ctx.strokeRect(x, y, w, h);
-    ctx.setLineDash([]);
     ctx.restore();
 
-    // Número
-    ctx.fillStyle = '#000000';
+    ctx.fillStyle = paid ? '#FFFFFF' : '#000000';
     ctx.font = '700 16px Arial, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
     ctx.fillText(formatNumber(n), x + w/2, y + 24);
 
-    // Nombre
     if(hasName){
       ctx.font = '400 10px Arial, sans-serif';
       wrapText(ctx, entry.name, x + w/2, y + 40, w - 10, 12, 2);
-    }
-
-    // Marca de pagado: simple check + texto, sin color
-    if(paid){
-      ctx.font = '700 9px Arial, sans-serif';
-      ctx.fillText('PAGADO', x + w/2, y + h - 8);
     }
   }
 
