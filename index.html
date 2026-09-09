@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestor de Rifas</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+  :root{
+    --bg: #16332B;
+    --panel: #1E4438;
+    --panel-2: #234E40;
+    --paper: #F4ECD8;
+    --ink: #1C2A22;
+    --gold: #C79A3D;
+    --red: #B23A32;
+    --green: #3F7A52;
+    --muted-border: #7E9A8C;
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(199,154,61,0.08), transparent 40%),
+      radial-gradient(circle at 90% 80%, rgba(199,154,61,0.06), transparent 45%);
+    color: var(--paper);
+    font-family: 'IBM Plex Sans', sans-serif;
+    padding: 24px 18px 60px;
+    min-height: 100vh;
+  }
+
+  .wrap{ max-width: 980px; margin: 0 auto; }
+
+  header.top{ margin-bottom: 18px; }
+  header.top h1{
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: clamp(26px, 5vw, 38px);
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+  }
+  header.top p{
+    margin: 0;
+    color: #B9CFC2;
+    font-size: 14px;
+    max-width: 60ch;
+  }
+
+  nav.tabs{
+    display:flex;
+    gap: 6px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid rgba(199,154,61,0.25);
+  }
+  nav.tabs button{
+    background: transparent;
+    border: none;
+    color: #B9CFC2;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 10px 6px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  nav.tabs button.active{
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+  }
+
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  .panel{
+    background: var(--panel);
+    border: 1px solid rgba(199,154,61,0.25);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+  }
+
+  .panel h2{
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 17px;
+    margin: 0 0 14px;
+    color: var(--gold);
+  }
+
+  .config-row{ display: flex; gap: 16px; flex-wrap: wrap; }
+  .field{ display: flex; flex-direction: column; gap: 5px; min-width: 110px; }
+  .field label{ font-size: 12.5px; color: #B9CFC2; }
+  .field input, .field select{
+    background: var(--panel-2);
+    border: 1px solid rgba(199,154,61,0.3);
+    color: var(--paper);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 14.5px;
+    font-family: inherit;
+  }
+  .field input:focus, .field select:focus{ outline: 2px solid var(--gold); outline-offset: 1px; }
+  .field.grow{ flex: 1; }
+
+  .helptext{ font-size: 12.5px; color: #B9CFC2; margin: 4px 0 0; }
+  .warning{
+    font-size: 13px;
+    color: #E8C77E;
+    background: rgba(199,154,61,0.12);
+    border: 1px solid rgba(199,154,61,0.3);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-top: 14px;
+  }
+
+  .stats{ display:flex; gap: 18px; flex-wrap: wrap; margin-top: 4px; }
+  .stat{ display:flex; flex-direction: column; gap: 2px; }
+  .stat .n{ font-family:'Fraunces', serif; font-weight:700; font-size: 22px; }
+  .stat .l{ font-size: 12px; color: #B9CFC2; }
+  .stat.paid .n{ color: var(--green); }
+  .stat.pending .n{ color: var(--red); }
+  .stat.free .n{ color: var(--gold); }
+
+  .actions{ display:flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+  button{
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 8px;
+    padding: 10px 16px;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-primary{ background: var(--gold); color: #1C2A22; }
+  .btn-primary:hover{ background: #d6ab4c; }
+  .btn-secondary{ background: transparent; border: 1px solid rgba(244,236,216,0.35); color: var(--paper); }
+  .btn-secondary:hover{ border-color: var(--paper); }
+  .btn-danger{ background: transparent; border: 1px solid var(--red); color: #E8A39E; }
+  .btn-danger:hover{ background: rgba(178,58,50,0.15); }
+
+  #editor{ display:none; position: sticky; top: 12px; z-index: 10; }
+  #editor.open{ display:block; }
+  #editor .panel{ border-color: var(--gold); box-shadow: 0 8px 30px rgba(0,0,0,0.35); }
+  .editor-row{ display:flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; }
+  .editor-badge{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size: 26px;
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 10px;
+    padding: 8px 16px;
+    min-width: 56px;
+    text-align:center;
+  }
+  .paid-toggle{ display:flex; align-items:center; gap: 8px; padding: 9px 4px; }
+  .paid-toggle input{ width: 17px; height: 17px; accent-color: var(--green); }
+
+  .grid-hint{ font-size: 12.5px; color: #B9CFC2; margin: 0 0 14px; }
+
+  #grid{ display: grid; gap: 8px; }
+
+  .cell{
+    position: relative;
+    background: var(--paper);
+    border-radius: 8px;
+    border: 1.5px dashed var(--muted-border);
+    color: var(--ink);
+    padding: 8px 6px;
+    min-height: 58px;
+    cursor: pointer;
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    overflow: hidden;
+    transition: transform 0.08s ease;
+  }
+  .cell:hover{ transform: translateY(-2px); }
+  .cell .num{ font-family:'Fraunces', serif; font-weight: 700; font-size: 17px; opacity: 0.55; line-height: 1; }
+  .cell .name{ font-size: 10.5px; font-weight: 600; margin-top: 3px; line-height: 1.15; word-break: break-word; }
+
+  .cell.pending{ border: 1.5px solid var(--red); }
+  .cell.pending .num{ opacity: 1; }
+  .cell.pending::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:5px; background: var(--red); }
+
+  .cell.paid{ border: 1.5px solid var(--green); }
+  .cell.paid .num{ opacity: 1; }
+  .cell.paid::after{
+    content: "PAGADO";
+    position: absolute; top: 4px; right: -18px;
+    background: var(--green); color: var(--paper);
+    font-size: 7.5px; font-weight: 700; letter-spacing: 0.04em;
+    padding: 2px 20px; transform: rotate(28deg);
+  }
+
+  .cell.selected{ outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  .status-line{
+    display:flex; align-items:center; gap: 10px;
+    font-size: 12.5px; color: #B9CFC2; margin-bottom: 14px;
+  }
+  .status-dot{ width:7px; height:7px; border-radius:50%; background: var(--gold); }
+
+  footer.credit{ text-align:center; color: #7E9A8C; font-size: 12px; margin-top: 30px; }
+
+  @media (max-width: 480px){
+    .cell{ min-height: 50px; }
+    .cell .num{ font-size: 15px; }
+    .cell .name{ font-size: 9.5px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>Gestor de rifas</h1>
+    <p>Configura la rifa, asigna números y descarga la imagen final para compartirla.</p>
+  </header>
+
+  <div class="status-line" id="statusLine"><span class="status-dot"></span><span id="statusText">Cargando datos guardados…</span></div>
+
+  <nav class="tabs">
+    <button id="tabConfig" data-view="config">Configuración</button>
+    <button id="tabGrid" data-view="grid">Cuadrícula</button>
+  </nav>
+
+  <!-- CONFIG VIEW -->
+  <div class="view" id="view-config">
+    <div class="panel">
+      <h2>Datos de la rifa</h2>
+      <div class="config-row">
+        <div class="field grow">
+          <label for="titleInput">Título de la rifa</label>
+          <input type="text" id="titleInput" value="Rifa">
+        </div>
+        <div class="field">
+          <label for="totalInput">Cantidad de números</label>
+          <input type="number" id="totalInput" min="2" max="1000" value="100">
+        </div>
+        <div class="field">
+          <label for="startInput">Empieza en</label>
+          <select id="startInput">
+            <option value="0">0</option>
+            <option value="1">1</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="colsInput">Columnas</label>
+          <input type="number" id="colsInput" min="4" max="20" value="10">
+        </div>
+      </div>
+      <p class="helptext" id="rangeHelp"></p>
+      <div class="warning" id="rangeWarning" style="display:none;"></div>
+      <div class="actions">
+        <button class="btn-primary" id="applyConfigBtn">Guardar configuración</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Terminar rifa</h2>
+      <p class="helptext">Cuando ya se jugó la rifa y quieres empezar una nueva, borra todos los datos guardados en este dispositivo.</p>
+      <div class="actions">
+        <button class="btn-danger" id="resetBtn">Borrar todos los datos</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRID VIEW -->
+  <div class="view" id="view-grid">
+    <div class="panel">
+      <h2 id="gridTitle">Rifa</h2>
+      <div class="stats" id="stats"></div>
+      <div class="actions">
+        <button class="btn-primary" id="downloadBtn">Descargar imagen</button>
+      </div>
+    </div>
+
+    <div id="editor">
+      <div class="panel">
+        <h2 id="editorTitle">Número</h2>
+        <div class="editor-row">
+          <div class="editor-badge" id="editorBadge">00</div>
+          <div class="field" style="flex:1; min-width:180px;">
+            <label for="nameInput">Nombre</label>
+            <input type="text" id="nameInput" placeholder="Nombre del comprador">
+          </div>
+          <label class="paid-toggle">
+            <input type="checkbox" id="paidInput">
+            Pagado
+          </label>
+          <button class="btn-primary" id="saveBtn">Guardar</button>
+          <button class="btn-danger" id="clearBtn">Vaciar número</button>
+          <button class="btn-secondary" id="closeEditorBtn">Cerrar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <p class="grid-hint">Gris punteado = disponible · borde rojo = asignado, falta pagar · sello verde = pagado</p>
+      <div id="grid"></div>
+    </div>
+  </div>
+
+  <footer class="credit">Los datos quedan guardados en este dispositivo hasta que los borres en "Terminar rifa".</footer>
+</div>
+
+<script>
+  const STORAGE_KEY = 'rifa-state';
+
+  let state = {
+    total: 100,
+    start: 1,
+    cols: 10,
+    title: "Rifa",
+    entries: {}
+  };
+  let selectedNumber = null;
+  let hasSavedState = false;
+
+  const totalInput = document.getElementById('totalInput');
+  const startInput = document.getElementById('startInput');
+  const colsInput = document.getElementById('colsInput');
+  const titleInput = document.getElementById('titleInput');
+  const grid = document.getElementById('grid');
+  const editor = document.getElementById('editor');
+  const editorBadge = document.getElementById('editorBadge');
+  const editorTitle = document.getElementById('editorTitle');
+  const nameInput = document.getElementById('nameInput');
+  const paidInput = document.getElementById('paidInput');
+  const statusText = document.getElementById('statusText');
+  const rangeWarning = document.getElementById('rangeWarning');
+  const rangeHelp = document.getElementById('rangeHelp');
+
+  function setStatus(msg){ statusText.textContent = msg; }
+
+  // ---------- Persistence ----------
+  async function saveState(){
+    try{
+      await window.storage.set(STORAGE_KEY, JSON.stringify(state), false);
+      setStatus('Guardado en este dispositivo');
+    }catch(err){
+      console.error('Error guardando', err);
+      setStatus('No se pudo guardar (revisa tu conexión)');
+    }
+  }
+
+  async function loadState(){
+    try{
+      const result = await window.storage.get(STORAGE_KEY, false);
+      if(result && result.value){
+        const parsed = JSON.parse(result.value);
+        state = Object.assign(state, parsed);
+        hasSavedState = true;
+        setStatus('Datos cargados de este dispositivo');
+      } else {
+        setStatus('Rifa nueva — configúrala para empezar');
+      }
+    }catch(err){
+      hasSavedState = false;
+      setStatus('Rifa nueva — configúrala para empezar');
+    }
+  }
+
+  // ---------- Views ----------
+  function showView(name){
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + name).classList.add('active');
+    document.querySelectorAll('nav.tabs button').forEach(b => b.classList.remove('active'));
+    document.querySelector(`nav.tabs button[data-view="${name}"]`).classList.add('active');
+  }
+
+  document.querySelectorAll('nav.tabs button').forEach(btn => {
+    btn.addEventListener('click', () => showView(btn.dataset.view));
+  });
+
+  // ---------- Helpers ----------
+  function padLength(){
+    const max = state.start + state.total - 1;
+    return String(max).length;
+  }
+  function formatNumber(n){ return String(n).padStart(padLength(), '0'); }
+
+  function updateRangeHelp(){
+    const startVal = parseInt(startInput.value) || 0;
+    const totalVal = Math.max(2, parseInt(totalInput.value) || 100);
+    rangeHelp.textContent = `Los números irán del ${String(startVal).padStart(String(startVal+totalVal-1).length,'0')} al ${String(startVal+totalVal-1).padStart(String(startVal+totalVal-1).length,'0')}.`;
+  }
+  totalInput.addEventListener('input', updateRangeHelp);
+  startInput.addEventListener('input', updateRangeHelp);
+
+  // ---------- Rendering ----------
+  function renderGrid(){
+    grid.style.gridTemplateColumns = `repeat(${state.cols}, 1fr)`;
+    grid.innerHTML = '';
+    for(let i = 0; i < state.total; i++){
+      const n = state.start + i;
+      const entry = state.entries[n];
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      if(entry && entry.paid) cell.classList.add('paid');
+      else if(entry && entry.name) cell.classList.add('pending');
+      if(n === selectedNumber) cell.classList.add('selected');
+      cell.dataset.number = n;
+
+      const num = document.createElement('div');
+      num.className = 'num';
+      num.textContent = formatNumber(n);
+      cell.appendChild(num);
+
+      if(entry && entry.name){
+        const name = document.createElement('div');
+        name.className = 'name';
+        name.textContent = entry.name;
+        cell.appendChild(name);
+      }
+
+      cell.addEventListener('click', () => openEditor(n));
+      grid.appendChild(cell);
+    }
+    renderStats();
+    document.getElementById('gridTitle').textContent = state.title;
+  }
+
+  function renderStats(){
+    const total = state.total;
+    let paid = 0, pending = 0;
+    Object.values(state.entries).forEach(e => {
+      if(e && e.name){ if(e.paid) paid++; else pending++; }
+    });
+    const free = total - paid - pending;
+    document.getElementById('stats').innerHTML = `
+      <div class="stat"><div class="n">${total}</div><div class="l">Total</div></div>
+      <div class="stat paid"><div class="n">${paid}</div><div class="l">Pagados</div></div>
+      <div class="stat pending"><div class="n">${pending}</div><div class="l">Pendientes</div></div>
+      <div class="stat free"><div class="n">${free}</div><div class="l">Disponibles</div></div>
+    `;
+  }
+
+  function fillConfigForm(){
+    titleInput.value = state.title;
+    totalInput.value = state.total;
+    startInput.value = state.start;
+    colsInput.value = state.cols;
+    updateRangeHelp();
+  }
+
+  // ---------- Editor ----------
+  function openEditor(n){
+    selectedNumber = n;
+    const entry = state.entries[n] || { name: '', paid: false };
+    editorBadge.textContent = formatNumber(n);
+    editorTitle.textContent = `Número ${formatNumber(n)}`;
+    nameInput.value = entry.name || '';
+    paidInput.checked = !!entry.paid;
+    editor.classList.add('open');
+    renderGrid();
+    nameInput.focus();
+  }
+  function closeEditor(){
+    selectedNumber = null;
+    editor.classList.remove('open');
+    renderGrid();
+  }
+  function saveEntry(){
+    if(selectedNumber === null) return;
+    const name = nameInput.value.trim();
+    if(name) state.entries[selectedNumber] = { name, paid: paidInput.checked };
+    else delete state.entries[selectedNumber];
+    closeEditor();
+    saveState();
+  }
+  function clearEntry(){
+    if(selectedNumber === null) return;
+    delete state.entries[selectedNumber];
+    closeEditor();
+    saveState();
+  }
+
+  document.getElementById('saveBtn').addEventListener('click', saveEntry);
+  document.getElementById('clearBtn').addEventListener('click', clearEntry);
+  document.getElementById('closeEditorBtn').addEventListener('click', closeEditor);
+  nameInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') saveEntry(); });
+
+  // ---------- Config ----------
+  function applyConfig(){
+    const total = Math.max(2, Math.min(1000, parseInt(totalInput.value) || 100));
+    const start = parseInt(startInput.value) || 0;
+    const cols = Math.max(4, Math.min(20, parseInt(colsInput.value) || 10));
+    const title = titleInput.value.trim() || 'Rifa';
+
+    const removed = [];
+    Object.keys(state.entries).forEach(k => {
+      const n = parseInt(k);
+      if(n < start || n >= start + total){
+        if(state.entries[k].name) removed.push(formatNumberFor(n, start, total));
+        delete state.entries[k];
+      }
+    });
+
+    state.total = total;
+    state.start = start;
+    state.cols = cols;
+    state.title = title;
+
+    if(removed.length){
+      rangeWarning.style.display = 'block';
+      rangeWarning.textContent = `Se quitaron ${removed.length} número(s) asignado(s) que quedaron fuera del nuevo rango.`;
+    } else {
+      rangeWarning.style.display = 'none';
+    }
+
+    renderGrid();
+    saveState();
+    showView('grid');
+  }
+  function formatNumberFor(n, start, total){
+    const max = start + total - 1;
+    return String(n).padStart(String(max).length, '0');
+  }
+
+  document.getElementById('applyConfigBtn').addEventListener('click', applyConfig);
+
+  document.getElementById('resetBtn').addEventListener('click', async () => {
+    if(confirm('¿Borrar todos los datos guardados de esta rifa? Esta acción no se puede deshacer.')){
+      state = { total: 100, start: 1, cols: 10, title: 'Rifa', entries: {} };
+      try{ await window.storage.delete(STORAGE_KEY, false); }catch(e){}
+      fillConfigForm();
+      renderGrid();
+      closeEditor();
+      setStatus('Datos borrados — configura una rifa nueva');
+    }
+  });
+
+  // ---------- Image export (blanco y negro, sin adornos) ----------
+  document.getElementById('downloadBtn').addEventListener('click', downloadImage);
+
+  function downloadImage(){
+    const cols = state.cols;
+    const rows = Math.ceil(state.total / cols);
+    const cellW = 92, cellH = 68, pad = 24, headerH = 64, gap = 6;
+    const scale = 2;
+
+    const width = pad * 2 + cols * cellW + (cols - 1) * gap;
+    const height = headerH + pad + rows * cellH + (rows - 1) * gap + pad;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(scale, scale);
+
+    // Fondo blanco
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, width, height);
+
+    // Título
+    ctx.fillStyle = '#000000';
+    ctx.font = '700 22px Arial, sans-serif';
+    ctx.textBaseline = 'top';
+    ctx.textAlign = 'left';
+    ctx.fillText(state.title, pad, 14);
+
+    ctx.font = '400 12px Arial, sans-serif';
+    const paidCount = Object.values(state.entries).filter(e => e && e.paid).length;
+    const pendingCount = Object.values(state.entries).filter(e => e && e.name && !e.paid).length;
+    ctx.fillText(`${state.total} números  ·  ${paidCount} pagados  ·  ${pendingCount} pendientes`, pad, 40);
+
+    for(let i = 0; i < state.total; i++){
+      const n = state.start + i;
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const x = pad + col * (cellW + gap);
+      const y = headerH + row * (cellH + gap);
+      drawCellBW(ctx, x, y, cellW, cellH, n, state.entries[n]);
+    }
+
+    canvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${state.title.replace(/\s+/g,'_').toLowerCase()}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  function drawCellBW(ctx, x, y, w, h, n, entry){
+    const paid = entry && entry.paid;
+    const hasName = entry && entry.name;
+
+    ctx.save();
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1;
+    if(!hasName){
+      ctx.setLineDash([2,2]);
+    } else {
+      ctx.setLineDash([]);
+    }
+    ctx.strokeRect(x, y, w, h);
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    // Número
+    ctx.fillStyle = '#000000';
+    ctx.font = '700 16px Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText(formatNumber(n), x + w/2, y + 24);
+
+    // Nombre
+    if(hasName){
+      ctx.font = '400 10px Arial, sans-serif';
+      wrapText(ctx, entry.name, x + w/2, y + 40, w - 10, 12, 2);
+    }
+
+    // Marca de pagado: simple check + texto, sin color
+    if(paid){
+      ctx.font = '700 9px Arial, sans-serif';
+      ctx.fillText('PAGADO', x + w/2, y + h - 8);
+    }
+  }
+
+  function wrapText(ctx, text, cx, y, maxWidth, lineHeight, maxLines){
+    const words = text.split(' ');
+    let line = '';
+    const lines = [];
+    for(let i = 0; i < words.length; i++){
+      const test = line + words[i] + ' ';
+      if(ctx.measureText(test).width > maxWidth && line !== ''){
+        lines.push(line.trim());
+        line = words[i] + ' ';
+      } else {
+        line = test;
+      }
+    }
+    lines.push(line.trim());
+    const shown = lines.slice(0, maxLines);
+    if(lines.length > maxLines){
+      shown[maxLines - 1] = shown[maxLines - 1].replace(/.{0,3}$/, '') + '…';
+    }
+    shown.forEach((l, idx) => ctx.fillText(l, cx, y + idx * lineHeight));
+  }
+
+  // ---------- Init ----------
+  async function init(){
+    await loadState();
+    fillConfigForm();
+    renderGrid();
+    showView('grid');
+  }
+  init();
+</script>
+</body>
+</html>
